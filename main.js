@@ -8,6 +8,10 @@ const path = require('path');
 const fs = require('fs');
 const Store = require('electron-store');
 
+// 设置控制台输出编码为UTF-8，解决中文乱码问题
+process.env.LANG = 'zh_CN.UTF-8';
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+
 // 初始化配置存储
 const store = new Store();
 
@@ -51,8 +55,75 @@ function createWindow() {
 app.whenReady().then(() => {
   createWindow();
 
-  // 注册F12全局快捷键打开开发者工具和帮助菜单
-  globalShortcut.register('F12', () => {
+  // 注册开发者工具快捷键
+  // 由于F12可能被其他应用占用，我们提供多个快捷键选项
+  setTimeout(() => {
+    registerDevToolsShortcuts();
+  }, 1000); // 延迟注册快捷键，避免与其他应用冲突
+  
+  // 注册所有开发者工具相关快捷键的函数
+  function registerDevToolsShortcuts() {
+    console.log('开始注册开发者工具快捷键...');
+    // 清除所有可能存在的快捷键注册
+    globalShortcut.unregisterAll();
+    
+    // 尝试注册多个快捷键以确保至少有一个可用
+    const shortcuts = [
+      { key: 'F12', name: 'F12' },
+      { key: 'CommandOrControl+F12', name: 'Ctrl+F12' },
+      { key: 'CommandOrControl+Shift+I', name: 'Ctrl+Shift+I' }
+    ];
+    
+    let successCount = 0;
+    
+    shortcuts.forEach(shortcut => {
+      try {
+        const registered = globalShortcut.register(shortcut.key, () => {
+          console.log(`${shortcut.name} 快捷键被按下 - 正在打开开发者工具`);
+          const focusedWindow = BrowserWindow.getFocusedWindow();
+          if (focusedWindow) {
+            console.log(`正在为窗口打开开发者工具...`);
+            focusedWindow.webContents.toggleDevTools();
+          } else {
+            console.log('未找到焦点窗口，无法打开开发者工具');
+            // 如果没有焦点窗口，尝试使用主窗口
+            if (mainWindow) {
+              console.log('使用主窗口打开开发者工具');
+              mainWindow.webContents.toggleDevTools();
+            }
+          }
+        });
+        
+        if (registered) {
+          console.log(`${shortcut.name} 快捷键注册成功`);
+          successCount++;
+        } else {
+          console.log(`${shortcut.name} 快捷键注册失败 - 可能与其他应用冲突`);
+        }
+      } catch (error) {
+        console.error(`注册 ${shortcut.name} 快捷键时发生错误:`, error);
+      }
+    });
+    
+    console.log(`成功注册了 ${successCount} 个开发者工具快捷键`);
+    
+    // 显示可用的快捷键信息
+    if (successCount > 0) {
+      const availableShortcuts = shortcuts
+        .filter((s, i) => globalShortcut.isRegistered(s.key))
+        .map(s => s.name)
+        .join(', ');
+      
+      console.log(`可用的开发者工具快捷键: ${availableShortcuts}`);
+      
+    } else {
+      console.log('所有快捷键注册失败，请使用菜单或按钮打开开发者工具');
+    }
+  }
+  
+  // 注册Alt+F12快捷键打开帮助菜单
+  globalShortcut.register('Alt+F12', () => {
+    console.log('Alt+F12 pressed');
     const focusedWindow = BrowserWindow.getFocusedWindow();
     if (focusedWindow) {
       // 显示一个包含开发者工具和关于信息的菜单
