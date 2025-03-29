@@ -29,6 +29,16 @@ function App() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // 首先检查GitLab配置是否已完成
+        const isConfigured = await gitlabService.isConfigured();
+        
+        if (!isConfigured) {
+          console.log('GitLab配置未完成，请先设置GitLab地址和访问令牌');
+          setCurrentPage('settings');
+          setIsAuthenticated(false);
+          return;
+        }
+        
         const token = await gitlabService.getToken();
         if (token) {
           const userData = await gitlabService.getCurrentUser();

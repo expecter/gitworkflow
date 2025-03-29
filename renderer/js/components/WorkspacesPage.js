@@ -444,7 +444,7 @@ function WorkspacesPage({ user, showNotification }) {
                         'button',
                         {
                           className: "btn btn-secondary",
-                          onClick: () => window.ipcRenderer.invoke('workspace:openInExplorer', selectedRepository.path)
+                          onClick: () => ipcRenderer.invoke('workspace:openInExplorer', selectedRepository.path)
                         },
                         '在文件管理器中打开'
                       )

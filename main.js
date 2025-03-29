@@ -3,7 +3,7 @@
  * 负责创建窗口、处理IPC通信和管理应用生命周期
  */
 
-const { app, BrowserWindow, ipcMain, dialog, globalShortcut } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, globalShortcut, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const Store = require('electron-store');
@@ -198,6 +198,18 @@ ipcMain.handle('gitlab:getToken', async () => {
  */
 ipcMain.handle('gitlab:setToken', async (event, token) => {
   store.set('gitlab.token', token);
+});
+
+/**
+ * 在文件管理器中打开目录
+ */
+ipcMain.handle('workspace:openInExplorer', async (event, dirPath) => {
+  try {
+    await shell.openPath(dirPath);
+  } catch (error) {
+    console.error('打开目录失败:', error);
+    throw error;
+  }
   return true;
 });
 

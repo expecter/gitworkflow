@@ -62,6 +62,13 @@ function SettingsPage({ onLogin, isAuthenticated, user, showNotification }) {
       React.createElement('h2', { className: 'page-title' }, '设置')
     ),
     
+    !isAuthenticated && React.createElement(
+      'div',
+      { className: 'alert alert-info' },
+      React.createElement('p', null, '首次使用需要设置GitLab地址和访问令牌，以便连接到您的GitLab账户。'),
+      React.createElement('p', null, '设置完成后，应用将自动扫描您的本地工作区间并与GitLab项目建立关联。')
+    ),
+    
     React.createElement(
       'div',
       { className: 'card' },

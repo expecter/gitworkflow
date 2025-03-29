@@ -11,6 +11,20 @@ const { ipcRenderer } = require('electron');
  */
 class GitLabService {
   /**
+   * 检查GitLab配置是否已完成
+   * @returns {Promise<boolean>} 配置是否已完成
+   */
+  async isConfigured() {
+    try {
+      const token = await this.getToken();
+      const baseUrl = await this.getBaseUrl();
+      return !!(token && baseUrl);
+    } catch (error) {
+      console.error('检查GitLab配置失败:', error);
+      return false;
+    }
+  }
+  /**
    * 获取GitLab访问令牌
    */
   async getToken() {
