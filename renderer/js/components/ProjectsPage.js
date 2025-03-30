@@ -6,6 +6,7 @@ const React = require('react');
 const { useState, useEffect } = React;
 const gitlabService = require('../services/gitlab-service');
 const workspaceService = require('../services/workspace-service');
+const browserService = require('../services/browser-service');
 
 function ProjectsPage({ user, showNotification }) {
   const [projects, setProjects] = useState([]);
@@ -336,7 +337,12 @@ function ProjectsPage({ user, showNotification }) {
                               { key: mr.id, className: "list-group-item" },
                               React.createElement(
                                 'a',
-                                { href: mr.web_url, target: "_blank", rel: "noopener noreferrer" },
+                                { 
+                                  href: mr.web_url, 
+                                  onClick: (e) => handleExternalLinkClick(e, mr.web_url),
+                                  target: "_blank", 
+                                  rel: "noopener noreferrer" 
+                                },
                                 mr.title
                               ),
                               React.createElement(
@@ -371,7 +377,12 @@ function ProjectsPage({ user, showNotification }) {
                               { key: issue.id, className: "list-group-item" },
                               React.createElement(
                                 'a',
-                                { href: issue.web_url, target: "_blank", rel: "noopener noreferrer" },
+                                { 
+                                  href: issue.web_url, 
+                                  onClick: (e) => handleExternalLinkClick(e, issue.web_url),
+                                  target: "_blank", 
+                                  rel: "noopener noreferrer" 
+                                },
                                 issue.title
                               ),
                               React.createElement(
@@ -391,3 +402,10 @@ function ProjectsPage({ user, showNotification }) {
 }
 
 module.exports = ProjectsPage;
+
+
+// 处理外部链接点击
+const handleExternalLinkClick = async (e, url) => {
+  e.preventDefault();
+  await browserService.openExternalUrl(url);
+};
