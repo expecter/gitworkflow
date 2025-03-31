@@ -3,12 +3,14 @@
  */
 
 const React = require('react');
-const { useState } = React;
+const { useState, useRef, useEffect } = React;
 const browserService = require('../services/browser-service');
 
 function DownloadsPage({ user, showNotification }) {
   const [loading, setLoading] = useState(false);
   const [selectedTool, setSelectedTool] = useState(null);
+  const [canGoBack, setCanGoBack] = useState(false);
+  const iframeRef = useRef(null);
   
   // 定义下载工具列表
   const downloadTools = [
@@ -44,6 +46,43 @@ function DownloadsPage({ user, showNotification }) {
   
   // 获取当前选中的工具，默认为第一个
   const currentTool = selectedTool || downloadTools[0];
+  
+  // 处理返回上一页操作
+  const handleGoBack = () => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      try {
+        iframeRef.current.contentWindow.history.back();
+      } catch (error) {
+        console.error('返回上一页失败:', error);
+        showNotification('返回上一页失败: ' + error.message, 'error');
+      }
+    }
+  };
+  
+  // 监听iframe的加载事件，检查是否可以返回
+  useEffect(() => {
+    const checkBackHistory = () => {
+      if (iframeRef.current && iframeRef.current.contentWindow) {
+        try {
+          // 尝试获取历史记录长度，如果大于1则可以返回
+          const historyLength = iframeRef.current.contentWindow.history.length;
+          setCanGoBack(historyLength > 1);
+        } catch (error) {
+          console.error('检查历史记录失败:', error);
+          setCanGoBack(false);
+        }
+      }
+    };
+    
+    // 添加iframe加载完成的事件监听
+    const iframe = iframeRef.current;
+    if (iframe) {
+      iframe.addEventListener('load', checkBackHistory);
+      return () => {
+        iframe.removeEventListener('load', checkBackHistory);
+      };
+    }
+  }, [selectedTool]);
 
   return React.createElement(
     'div',
@@ -78,60 +117,33 @@ function DownloadsPage({ user, showNotification }) {
     React.createElement(
       'div',
       { className: "tools-container" },
-      React.createElement(
-        'div',
-        { className: "tools-description" },
-        React.createElement(
-          'div',
-          { className: "tool-info-card" },
-          React.createElement('h3', null, currentTool.name),
-          React.createElement('p', null, currentTool.description)
-        )
-      ),
       
       React.createElement(
         'div',
         { className: "tool-details" },
-        React.createElement(
-          'div',
-          { className: "card" },
-          React.createElement(
-            'div',
-            { className: "card-header" },
-            React.createElement('h3', { className: "card-title" }, `${currentTool.name}软件资源`)
-          ),
-          React.createElement(
-            'div',
-            { className: "card-body" },
-            React.createElement(
-              'p',
-              null,
-              currentTool.description
-            ),
-            React.createElement(
-              'div',
-              { className: "download-actions" },
-              React.createElement(
-                'a',
-                { 
-                  href: currentTool.url,
-                  className: "btn btn-primary",
-                  onClick: (e) => handleExternalLinkClick(e, currentTool.url),
-                  target: "_blank", 
-                  rel: "noopener noreferrer" 
-                },
-                '打开下载页面'
-              )
-            )
-          )
-        ),
         
         React.createElement(
           'div',
           { className: "iframe-container" },
           React.createElement(
+            'div',
+            { className: "iframe-navigation" },
+            React.createElement(
+              'button',
+              { 
+                className: "back-button", 
+                onClick: handleGoBack,
+                disabled: !canGoBack,
+                title: "返回上一页"
+              },
+              React.createElement('span', { className: "back-icon" }, '←'),
+              "返回上一页"
+            )
+          ),
+          React.createElement(
             'iframe',
             {
+              ref: iframeRef,
               src: currentTool.url,
               width: "100%",
               height: "600px",

@@ -80,7 +80,7 @@ function Sidebar({ currentPage, onPageChange, isAuthenticated, user }) {
             onClick: () => onPageChange('downloads')
           },
           React.createElement('span', { className: 'nav-icon' }, '📥'),
-          React.createElement('span', null, 'Python下载')
+          React.createElement('span', null, '软件下载')
         )
       )
     ),
