@@ -71,6 +71,16 @@ function Sidebar({ currentPage, onPageChange, isAuthenticated, user }) {
           },
           React.createElement('span', { className: 'nav-icon' }, '⚙️'),
           React.createElement('span', null, '设置')
+        ),
+        
+        React.createElement(
+          'li',
+          { 
+            className: `nav-item ${currentPage === 'downloads' ? 'active' : ''}`,
+            onClick: () => onPageChange('downloads')
+          },
+          React.createElement('span', { className: 'nav-icon' }, '📥'),
+          React.createElement('span', null, 'Python下载')
         )
       )
     ),

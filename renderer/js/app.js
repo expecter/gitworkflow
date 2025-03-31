@@ -11,6 +11,7 @@ const Sidebar = require('./components/Sidebar');
 const ProjectsPage = require('./components/ProjectsPage');
 const WorkspacesPage = require('./components/WorkspacesPage');
 const SettingsPage = require('./components/SettingsPage');
+const DownloadsPage = require('./components/DownloadsPage');
 const Notification = require('./components/Notification');
 // HelpMenu组件已移除，功能已整合到F12快捷键中
 
@@ -106,6 +107,11 @@ function App() {
         return React.createElement(SettingsPage, {
           onLogin: handleLogin,
           isAuthenticated: isAuthenticated,
+          user: user,
+          showNotification: showNotification
+        });
+      case 'downloads':
+        return React.createElement(DownloadsPage, {
           user: user,
           showNotification: showNotification
         });
